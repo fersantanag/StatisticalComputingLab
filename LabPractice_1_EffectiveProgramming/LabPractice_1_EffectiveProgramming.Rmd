@@ -24,9 +24,9 @@ knit_hooks$set(output = function(x, options) {
 opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE, linewidth=79)
 ```
 
-Name:  Alvaro Diez de Rivera De Solis
-ICAI ID: 201801348
-Collaborated with: Alvaro Lastra Aragones
+Name: Armando Sala López
+ICAI ID: 201804945
+Collaborated with:  
 
 This lab is to be done in class (completed outside of class time). You may collaborate with one classmate, but you must identify his/her name above, and you must submit **your own** lab as this completed .Rmd file. 
 
@@ -35,12 +35,13 @@ Installing and loading packages
 
 In order to perform the exercise in this practice you should install and load the `microbenchmark` and `profvis` packages. Also install `devtools` in order to install the `efficientR` package where there are datasets that are used in this practice using `devtools::install_github("csgillespie/efficientR")`. You should also install the `proftools` package from CRAN.
 
-```{r}
-# YOUR CODE GOES HERE
-devtools::install_github("csgillespie/efficientR")
+#Instalamos los paquetes
+```{r, eval = FALSE}
+library('microbenchmark')
 ```
 
 From the `Bioconductor` repository you must also install the `graph` and `Rgraphviz` packages. To install packages from this repository, you must install `BiocManager` package first and then use the `BiocManager::install()` function to install the packages.
+
 ```{r, eval = FALSE}
 install.packages("BiocManager", dep = TRUE)
 BiocManager::install(c("Rgraphviz","graph"))
@@ -75,66 +76,27 @@ cs_apply <- function(x) {
 cumsum(x)
 
 # YOUR CODE GOES HERE
-microbenchmark::microbenchmark(cs_for <- function(x) {
-  for (i in x) {
-    if (i == 1) {
-      xc = x[i]
-    } else {
-      xc = c(xc, sum(x[1:i]))
-    }
-  }
-  xc
-})
-
-microbenchmark::microbenchmark(cs_apply <- function(x) {
-  sapply(x, function(x) sum(1:x))
-})
-
-microbenchmark::microbenchmark(cumsum(x))
-
-#The fastest is 0.4 ns seconds faster than the second one (using the mean).
+t1 <- microbenchmark::microbenchmark(cs_for(x), cs_apply(x), cumsum(x))
+t1
+#Cumsum es el más rapido
 ```
 
 **1b.** Run the same benchmark but now `x` is `1:50000`. As the benchmark could take too long, set the argument `time = 1` in the `microbenchmark` function. Does the relative difference between the fastest and the second fastest increase or decrease? By how much?
 
 ```{r q1b}
-# YOUR CODE GOES HERE
-x <- 1:50000
-
-microbenchmark::microbenchmark(cs_for <- function(x) {
-  for (i in x) {
-    if (i == 1) {
-      xc = x[i]
-    } else {
-      xc = c(xc, sum(x[1:i]))
-    }
-  }
-  xc
-}, time = 1)
-
-microbenchmark::microbenchmark(cs_apply <- function(x) {
-  sapply(x, function(x) sum(1:x))
-}, time = 1)
-
-microbenchmark::microbenchmark(cumsum(x), time = 1)
-
-#The difference has increase to 6 ns.
+x2 <- 1:50000
+t2 <- microbenchmark::microbenchmark(cs_for(x2), cs_apply(x2), cumsum(x2), time = 1)
+t2
+# The relative difference increases significantly between both values.
 ```
 
 **1c.** Try profiling a section of code you have written using the `profvis::profvis()` function. Where are the bottlenecks? Were they where you expected?
 
 ```{r q1c}
-# YOUR CODE GOES HERE
-
-
-profvis::profvis({
-  data(diamonds, package = "ggplot2")
-
-  plot(price ~ carat, data = diamonds)
-  m <- lm(price ~ carat, data = diamonds)
-  abline(m, col = "red")
-})
-#The bottleneck seems to be in the plotting, and it makes sense that it is the hardest part to compute.
+profvis::profvis({x2 <- 1:50000
+t2 <- microbenchmark::microbenchmark(cs_for(x2), cs_apply(x2), cumsum(x2), time = 1)
+t2})
+# Microbenchmark function is the bottleneck of this code. It is where I expected since the other lines are quick and easy to compute.
 ```
 
 **1d.** Let's profile a section of code with the `Rprof()` function. The code section is a function to compute sample variance of a numeric vector:
@@ -178,19 +140,15 @@ Rprof(NULL)
 Use the `summaryRprof()` function to print a summary of the code profiling. Which part of the function takes more time to execute? Which part of the function requires more memory?
 
 ```{r q1d}
-# YOUR CODE GOES HERE
-summaryRprof()
-#It takes 1.44 for the sq.var function while only 0.8 to the my.sum function.
-
-
+summaryRprof(filename = "Rprof.out", memory = 'both')
+# The function my.sum is the part that takes most time. The function sq.var is the one that requires most memory.
 ```
 
 **1e.** `summaryRprof()` function prints a summary of the code profiling, but it is not user-friendly to read. Using the `proftool` packages, let's see the results from the `Rprof.out` file. See the help (`?`) for the functions `readProfiledata` and `plotProfileCallGraph` and plot the results of the code profiling from **1d**.
 ```{r q1e}
-# YOUR CODE GOES HERE
-library(proftools)
-prof_data <- readProfileData("Rprof.out")
-plotProfileCallGraph(prof_data)
+#COMENTARRR
+profdata <- proftools::readProfileData("Rprof.out")
+proftools:plotProfileCallGraph(profdata)
 ```
 
 Q2. Efficient set-up
@@ -201,8 +159,7 @@ Let's check if you have an optimal R installation.
 **2a.** What is the exact version of your computer’s operating system?
 
 ```{r q2a}
-# YOUR CODE GOES HERE
-Sys.info()
+# Windows 11 Home
 ```
 
 **2b.** Start an activity monitor and execute the following chunk.In it, `lapply()` (or its parallel version `mclapply()`) is used to apply a function, median(), over every column in the data frame object X
@@ -220,21 +177,19 @@ r2 <- parallel::mclapply(X, median)
 **2c.** Try modifying the settings of your RStudio setup using the Tools > Global Options menu. What settings do you think can affect R performance? (Note only some of them, not ALL of them)
 
 ```{r q2c}
-# YOUR CODE GOES HERE
-#
+# R version
 ```
 
 **2d.** Try some of the shortcuts integrated in RStudio. What shortcuts do you think can save you development time? (Note only some of them, not ALL of them)
 
 ```{r q2d}
 # YOUR CODE GOES HERE
-
-
 ```
 
 **2e.** Check how well your computer is suited to perform data analysis tasks. In the following code chunk you will run a benchmark test from the `benchmarkme` package and plot your result against the results from people around the world. Do you think that you should upgrade your computer? 
 
 ```{r q2e, eval=FALSE }
+
 library("benchmarkme")
 # Run standard tests
 res_std <- benchmark_std(runs=3)
@@ -242,6 +197,7 @@ plot(res_std)
 # Run memory I/O tests by reading/writing a 5MB file
 res_io <- benchmark_io(runs = 1, size = 5)
 plot(res_io)
+# I rank amongst the lowest in most comparations. I should probably change my computer.
 ```
 
 Q3. Efficient programming
@@ -251,15 +207,6 @@ Q3. Efficient programming
 
 ```{r q3a}
 # YOUR CODE GOES HERE
-x <- rnorm(100)
-
-microbenchmark::microbenchmark(x = x + 1)
-
-microbenchmark::microbenchmark(
-  for (i in seq_len(n)) 
-    x[i] = x[i] + 1
-)
-
 ```
 
 **3b.** Monte Carlo integration can be performed with the following code:
@@ -424,20 +371,17 @@ Q7. Efficient hardware
 
 **7a.** How much RAM does your computer have? (Optional question, privacy above all. Write a random number if you do not want to share your hardware information.)
 ```{r q7a}
-# YOUR CODE GOES HERE
-64 GBT of Ram
+# 12 Gb
 ```
 
 **7b.** Using your preferred search engine, how much does it cost to double the amount of available RAM on your system? (Again, write a random number if you do not want to share your hardware information)
 
 ```{r q7b}
-# YOUR CODE GOES HERE
-Sys.info()
+# 110 Euros
 ```
 
 **7c.** Check if you are using a 32-bit or 64-bit version of R.
 
 ```{r q7c}
-# YOUR CODE GOES HERE
-version
+# 64 bit
 ```
