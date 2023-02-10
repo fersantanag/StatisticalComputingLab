@@ -53,14 +53,16 @@ no_cores
 
 ```{r q1b}
 # YOUR CODE GOES HERE
-cl = makeCluster(spec = "PSOCK")
-r = registerDoParallel(cl, cores = no_cores)
+cl = makeCluster(no_cores)
+r = registerDoParallel(cl)
+#cl = makeCluster(spec = "PSOCK")
+#r = registerDoParallel(cl, cores = no_cores)
 #
 ```
 
 **1c.** Now, you have the following function which calculates the prime numbers from `1` to `n`. Use the `microbenchmark` package to check which is faster to calculate the prime numbers when n goes from 10 to 10000: `lapply`, a `for` loop, `parLapply` or a `foreach` loop. The `lapply` and the `for` loop have been written for you. Which function is faster?
 
-```{r q1c}
+```{r}
 getPrimeNumbers <- function(n) {  
    n <- as.integer(n)
    if(n > 1e6) stop("n too large")
@@ -74,6 +76,10 @@ getPrimeNumbers <- function(n) {
    }
    which(primes)
 }
+getPrimeNumbers(20)
+```
+
+```{r q1c}
 n_vec <- 10:10000
 lapplyPrimeNumbers <- function(n_vec) {
   result <- lapply(n_vec, getPrimeNumbers(prime))  
@@ -118,5 +124,31 @@ boot_fx <- function(trial) {
 }
 # YOUR CODE GOES HERE
 
+x <- iris[which(iris[,5] != "setosa"), c(1,5)]
+trials <- seq(1, 10000)
+
+boot_fx <- function(trial) {
+  ind <- sample(100, 100, replace=TRUE)
+  result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  r <- coefficients(result1)
+  res <- rbind(data.frame(), r)
+}
+
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+results <- foreach(i=trials, .combine='rbind') %dopar% boot_fx(i)
+stopCluster(cl)
 #
 ```
+
+In this code, we first load the **`doParallel`** library and then create a parallel backend using the **`makeCluster`** function. The **`detectCores`** function is used to determine the number of available cores on the system. We then register the parallel backend using the **`registerDoParallel`** function.
+
+Next, we use the **`foreach`** function to apply the **`boot_fx`** function to each element in the **`trials`** sequence in parallel. The **`%dopar%`** operator is used to indicate that the function should be executed in parallel. The results of the individual trials are combined using **`rbind`** and stored in the **`results`** object.
+
+Finally, we stop the parallel cluster using the **`stopCluster`** function.
+
+This code will significantly speed up the computation of the bootstrapped estimates, as each iteration of the **`boot_fx`** function will be executed in parallel on a separate core.
+
+\
+
