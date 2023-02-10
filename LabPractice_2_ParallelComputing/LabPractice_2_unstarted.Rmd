@@ -1,0 +1,101 @@
+---
+title: 'Lab 02: Parallel Computing'
+author: "Introduction to Statistical Computing"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, include=FALSE}
+# A hook to wrap output based on a linewidth chunk option
+# From https://github.com/yihui/knitr-examples/blob/master/077-wrap-output.Rmd
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE, linewidth=79)
+```
+
+Name:  
+ICAI ID:  
+Collaborated with:  
+
+This lab is to be done in class (completed outside of class time). You may collaborate with one classmate, but you must identify his/her name above, and you must submit **your own** lab as this completed .Rmd file. 
+
+Installing and loading packages 
+===
+
+In order to perform the exercise in this practice you should install and load the `doParallel` package. 
+
+```{r}
+# YOUR CODE GOES HERE
+```
+
+Q1. Does parallelization worth it?
+===
+
+**1a.** First, let's check how many cores do you have in your computer. Create a new variable `no_cores` equal to the number of cores minus 1.
+
+```{r q1a}
+# YOUR CODE GOES HERE
+```
+
+**1b.** Register the cores and prepare the clusters using the `registerDoParallel()` and `makeCluster()` function. This will allow to parallelize code in the following code chunks.
+
+```{r q1b}
+# YOUR CODE GOES HERE
+```
+
+**1c.** Now, you have the following function which calculates the prime numbers from `1` to `n`. Use the `microbenchmark` package to check which is faster to calculate the prime numbers when n goes from 10 to 10000: `lapply`, a `for` loop, `parLapply` or a `foreach` loop. The `lapply` and the `for` loop have been written for you. Which function is faster?
+```{r q1c}
+getPrimeNumbers <- function(n) {  
+   n <- as.integer(n)
+   if(n > 1e6) stop("n too large")
+   primes <- rep(TRUE, n)
+   primes[1] <- FALSE
+   last.prime <- 2L
+   for(i in last.prime:floor(sqrt(n)))
+   {
+      primes[seq.int(2L*last.prime, n, last.prime)] <- FALSE
+      last.prime <- last.prime + min(which(primes[(last.prime+1):n]))
+   }
+   which(primes)
+}
+n_vec <- 10:10000
+lapplyPrimeNumbers <- function(n_vec) {
+  result <- lapply(n_vec, getPrimeNumbers(prime))  
+}
+forPrimeNumbers <- function(n_vec) {
+  result <- list()
+  for (n in n_vec) {
+    result[[n]] <- getPrimeNumbers(n)
+  }
+}
+# YOUR CODE GOES HERE
+```
+
+**1d** Remember to use stop the clusters in `cl` using the `stopCluster` function.
+```{r q1d}
+# YOUR CODE GOES HERE
+```
+
+**Challenge 01.** Search around your computer for a sequential code that might be parallelized. Using the `doParallel` package, parallelize the code and calculate the speedup. If you cannot find any code to parallelize, use the following code:
+```{r q1ch1}
+x <- iris[which(iris[,5] != "setosa"), c(1,5)]
+trials <- seq(1, 10000)
+boot_fx <- function(trial) {
+  ind <- sample(100, 100, replace=TRUE)
+  result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+  r <- coefficients(result1)
+  res <- rbind(data.frame(), r)
+}
+# YOUR CODE GOES HERE
+```
