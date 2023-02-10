@@ -167,6 +167,7 @@ Let's check if you have an optimal R installation.
 ```{r q2a}
 # YOUR CODE GOES HERE
 # Windows 10 Home
+Sys.info()
 #
 ```
 
@@ -187,6 +188,9 @@ r2 <- parallel::mclapply(X, median)
 ```{r q2c}
 # YOUR CODE GOES HERE
 # R version
+# Memory limit (Memory Available for R)
+#CPU Cores
+#Parallel Processing
 #
 ```
 
@@ -194,6 +198,11 @@ r2 <- parallel::mclapply(X, median)
 
 ```{r q2d}
 # YOUR CODE GOES HERE
+# Keyboard shortcuts
+# Code Snippets
+# Package Management (devtools // remotes)
+# Automate testing (testthat)
+#
 ```
 
 **2e.** Check how well your computer is suited to perform data analysis tasks. In the following code chunk you will run a benchmark test from the `benchmarkme` package and plot your result against the results from people around the world. Do you think that you should upgrade your computer?
@@ -216,6 +225,17 @@ plot(res_io)
 
 ```{r q3a}
 # YOUR CODE GOES HERE
+x <- runif(100)
+sum <- function(x){
+  x = x + 1
+}
+
+loop <- function(x){
+  for (i in seq_len(x)) x[i] = x[i] + 1
+}
+
+microbenchmark::microbenchmark(sum(x), loop(x))
+#
 ```
 
 **3b.** Monte Carlo integration can be performed with the following code:
