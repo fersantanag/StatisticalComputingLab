@@ -24,39 +24,42 @@ knit_hooks$set(output = function(x, options) {
 opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE, linewidth=79)
 ```
 
-Name: Armando Sala Lopez
-ICAI ID:  201804945
-Collaborated with:  
+Name: Fernando Santana Garcia\
+ICAI ID: 201804624\
+Collaborated with: Jorge Calvar
 
-This lab is to be done in class (completed outside of class time). You may collaborate with one classmate, but you must identify his/her name above, and you must submit **your own** lab as this completed .Rmd file. 
+This lab is to be done in class (completed outside of class time). You may collaborate with one classmate, but you must identify his/her name above, and you must submit **your own** lab as this completed .Rmd file.
 
-Installing and loading packages 
-===
+# Installing and loading packages
 
-In order to perform the exercise in this practice you should install and load the `doParallel` package. 
+In order to perform the exercise in this practice you should install and load the `doParallel` package.
 
 ```{r}
 library(doParallel)
 ```
 
-Q1. Does parallelization worth it?
-===
+# Q1. Does parallelization worth it?
 
 **1a.** First, let's check how many cores do you have in your computer. Create a new variable `no_cores` equal to the number of cores minus 1.
 
 ```{r q1a}
+# YOUR CODE GOES HERE
 no_cores = detectCores()-1
 no_cores
+#
 ```
 
 **1b.** Register the cores and prepare the clusters using the `registerDoParallel()` and `makeCluster()` function. This will allow to parallelize code in the following code chunks.
 
 ```{r q1b}
+# YOUR CODE GOES HERE
 cl = makeCluster(spec = "PSOCK")
 r = registerDoParallel(cl, cores = no_cores)
+#
 ```
 
 **1c.** Now, you have the following function which calculates the prime numbers from `1` to `n`. Use the `microbenchmark` package to check which is faster to calculate the prime numbers when n goes from 10 to 10000: `lapply`, a `for` loop, `parLapply` or a `foreach` loop. The `lapply` and the `for` loop have been written for you. Which function is faster?
+
 ```{r q1c}
 getPrimeNumbers <- function(n) {  
    n <- as.integer(n)
@@ -82,6 +85,7 @@ forPrimeNumbers <- function(n_vec) {
   }
 }
 
+# YOUR CODE GOES HERE
 forEachPrimeNumbers <- function(n_vec) {
   result <- foreach(n = n_vec) %do% getPrimeNumbers(n)
 }
@@ -90,14 +94,19 @@ parLapplyPrimeNumbers <- function(n_vec){
   result <- parLapply(cl, n_vec, getPrimeNumbers(prime))
 }
 microbenchmark::microbenchmark(forPrimeNumbers(n_vec),lapplyPrimeNumbers(n_vec), parLapplyPrimeNumbers(n_vec), forEachPrimeNumbers(n_vec))
+#
 ```
 
 **1d** Remember to use stop the clusters in `cl` using the `stopCluster` function.
+
 ```{r q1d}
+# YOUR CODE GOES HERE
 stopCluster(cl)
+#
 ```
 
 **Challenge 01.** Search around your computer for a sequential code that might be parallelized. Using the `doParallel` package, parallelize the code and calculate the speedup. If you cannot find any code to parallelize, use the following code:
+
 ```{r q1ch1}
 x <- iris[which(iris[,5] != "setosa"), c(1,5)]
 trials <- seq(1, 10000)
@@ -108,4 +117,6 @@ boot_fx <- function(trial) {
   res <- rbind(data.frame(), r)
 }
 # YOUR CODE GOES HERE
+
+#
 ```
